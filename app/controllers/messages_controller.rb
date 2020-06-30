@@ -1,10 +1,10 @@
 class MessagesController < ApplicationController
-  load_and_authorize_resource #cancancan permissions
+  load_and_authorize_resource # cancancan permissions
   before_action :authenticate_user!
   skip_before_action :verify_authenticity_token
   before_action :verify_author, only: [:show]
-  # render form for new message
 
+  # render form for new message
   def new
     @message = Message.new
   end
@@ -22,7 +22,7 @@ class MessagesController < ApplicationController
     end
   end
 
-  #index checks if user has master permission
+  # index checks if user has master permission
   def index
     @messages = current_user.master? ? Message.master_messages.ordered : Message.sent_to(current_user).ordered
   end
@@ -35,7 +35,7 @@ class MessagesController < ApplicationController
     end
   end
 
-  #archive a single message by id
+  # archive a single message by id
   def archive
     @message = Message.find_by_title(params[:title])
     @message.archived!
