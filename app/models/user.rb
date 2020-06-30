@@ -6,7 +6,7 @@ class User < ApplicationRecord
 
   validates_presence_of :name
 
-  enum permission: { normal: 0, master: 1}
+  enum permission: { normal: 0, master: 1 }
   before_create :create_token
 
   has_many :messages, foreign_key: 'to'
