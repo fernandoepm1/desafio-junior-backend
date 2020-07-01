@@ -4,12 +4,13 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :rememberable, :trackable, :validatable
 
-  validates_presence_of :name
+  has_many :messages, foreign_key: 'to'
+
+  validates :name, :email, :password, :password_confirmation, presence: true
 
   enum permission: { normal: 0, master: 1 }
-  before_create :create_token
 
-  has_many :messages, foreign_key: 'to'
+  before_create :create_token
 
   # get all sent messages from user
   def messages_sent
@@ -18,7 +19,7 @@ class User < ApplicationRecord
 
   protected
 
-  #callback to create api token when user is created
+  # callback to create api token when user is created
   def create_token
     self.token = name.first(4).upcase + Time.now.strftime("%H:%M:%S").strip().to_s.gsub(/[^\d]/, "")
   end
