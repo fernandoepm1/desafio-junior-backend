@@ -10,9 +10,9 @@
 User.create(name: 'Admin', email: 'master@email.com', password: '123456', password_confirmation: '123456', permission: :master)
 
 # Normal Users
-User.create(name: 'Mario', email: 'mario@email.com', password: '123456', password_confirmation: '123456', permission: :normal)
-User.create(name: 'Luigi', email: 'luigi@email.com', password: '123456', password_confirmation: '123456', permission: :normal)
-User.create(name: 'Peach', email: 'peach@email.com', password: '123456', password_confirmation: '123456', permission: :normal)
-User.create(name: 'Toad', email: 'toad@email.com', password: '123456', password_confirmation: '123456', permission: :normal)
-User.create(name: 'Wario', email: 'wario@email.com', password: '123456', password_confirmation: '123456', permission: :normal)
-User.create(name: 'Bowser', email: 'bowser@email.com', password: '123456', password_confirmation: '123456', permission: :normal)
+User.create(name: 'Mario', email: 'mario@email.com', password: '123456', password_confirmation: '123456')
+User.create(name: 'Luigi', email: 'luigi@email.com', password: '123456', password_confirmation: '123456')
+User.create(name: 'Peach', email: 'peach@email.com', password: '123456', password_confirmation: '123456')
+User.create(name: 'Toad', email: 'toad@email.com', password: '123456', password_confirmation: '123456')
+User.create(name: 'Wario', email: 'wario@email.com', password: '123456', password_confirmation: '123456')
+User.create(name: 'Bowser', email: 'bowser@email.com', password: '123456', password_confirmation: '123456')
