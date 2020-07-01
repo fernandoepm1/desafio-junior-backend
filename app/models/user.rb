@@ -7,6 +7,8 @@ class User < ApplicationRecord
   has_many :messages, foreign_key: 'to'
 
   validates :name, :email, :password, :password_confirmation, presence: true
+  validates :email, uniqueness: true
+  validates :password, length: { minimum: 6 }
 
   enum permission: { normal: 0, master: 1 }
 
@@ -19,8 +21,16 @@ class User < ApplicationRecord
 
   protected
 
+  def token_first_half
+    self.name.gsub(/\s+/, '').first(4).upcase
+  end
+
+  def token_last_half
+    Time.now.strftime("%H:%M:%S").strip().to_s.gsub(/[^\d]/, "")
+  end
+
   # callback to create api token when user is created
   def create_token
-    self.token = name.first(4).upcase + Time.now.strftime("%H:%M:%S").strip().to_s.gsub(/[^\d]/, "")
+    self.token = "#{token_first_half + token_last_half}"
   end
 end
