@@ -24,8 +24,7 @@ Rails.application.routes.draw do
   # API endpoints
   namespace :api do
     namespace :v1 do
-      get   'profile', to: 'users#show'
-      patch 'profile', to: 'users#update'
+      resource :profile, only: %i[show update], controller: 'profile'
 
       resources :messages, only: %i[index create show] do
         collection do
