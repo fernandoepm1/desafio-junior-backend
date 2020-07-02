@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :user do
-    name { Faker::Name.name }
+    name { Faker::Superhero.name }
     email { Faker::Internet.email }
     password { 'secretsecret' }
     password_confirmation { 'secretsecret' }
@@ -9,10 +9,15 @@ FactoryBot.define do
       email { nil }
     end
 
+    trait :invalid_password do
+      password { 'secret' }
+    end
+
     trait :master do
       permission { :master }
     end
 
-    factory :admin, traits: %i[master]
+    factory :invalid_user, traits: %i[invalid_password]
+    factory :admin,        traits: %i[master]
   end
 end
