@@ -1,4 +1,7 @@
 class Api::V1::ApiController < ActionController::API
+  include ResponseManager
+  include ExceptionHandler
+
   respond_to :json
   before_action :check_basic_auth
 

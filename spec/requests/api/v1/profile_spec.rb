@@ -5,14 +5,12 @@ describe 'Profile', type: :request do
   let(:new_user_params) { attributes_for(:user) }
   let(:invalid_headers) {
     {
-      "Content-Type": "application/json",
-      "Authorization": "Batata"
+      "Authorization" => "Batata"
     }
   }
   let(:valid_headers) {
     {
-      "Content-Type": "application/json",
-      "Authorization": "#{current_user.token}"
+      "Authorization" => "#{current_user.token}"
     }
   }
 
@@ -34,15 +32,16 @@ describe 'Profile', type: :request do
     end
 
     context 'with a valid authorization header' do
-      before { get '/api/v1/profile', headers: valid_headers }
+      before { get '/api/v1/profile', headers: { 'Authorization' => "#{current_user.token}" } }
+
 
       it 'returns http status 200' do
         expect(response).to have_http_status(:success)
       end
 
       it 'returns profile info for current user' do
-        expect(response.body.user.name).to eq(current_user.name)
-        expect(response.body.user.email).to eq(current_user.email)
+        expect(json['name']).to eq(current_user.name)
+        expect(json['email']).to eq(current_user.email)
       end
     end
   end
