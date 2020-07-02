@@ -9,18 +9,20 @@ class Api::V1::ApiController < ActionController::API
 
   def check_basic_auth
     if request.authorization.blank?
-      head :unauthorized
+      msg = 'Missing Authorization token'
+      json_renderer({ error: { message: msg } }, :unauthorized)
       return
+    else
+      # Try to find user by token
+      token = request.authorization
+      user = User.find_by(token: token)
     end
-
-    # Try to find user by token
-    token = request.authorization
-    user = User.find_by(token: token)
 
     if user
       @current_user = user
     else
-      head :unauthorized
+      msg = 'Invalid token provided'
+      json_renderer({ error: { message: msg } }, :unauthorized)
     end
   end
 
