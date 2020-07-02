@@ -6,9 +6,8 @@ class User < ApplicationRecord
 
   has_many :messages, foreign_key: 'to'
 
-  validates :name, :email, :password, :password_confirmation, presence: true
+  validates :name, :email, presence: true, on: :create
   validates :email, uniqueness: true
-  validates :password, length: { minimum: 6 }
 
   enum permission: { normal: 0, master: 1 }
 
