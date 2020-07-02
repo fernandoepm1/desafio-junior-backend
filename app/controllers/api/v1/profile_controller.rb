@@ -1,7 +1,7 @@
 class Api::V1::ProfileController < Api::V1::ApiController
   # GET /api/v1/profile
   def show
-    json_response(current_user, Api::V1::ProfileSerializer)
+    json_renderer(current_user, :ok, Api::V1::ProfileSerializer)
   end
 
   # PUT/PATCH /api/v1/profile

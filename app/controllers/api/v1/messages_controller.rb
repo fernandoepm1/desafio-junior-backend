@@ -3,26 +3,26 @@ class Api::V1::MessagesController < Api::V1::ApiController
 
   # GET /api/v1/messages
   def index
-    @messages = current_user.messages
-    json_response(@messages)
+    @messages = Message.sent_to(current_user).ordered
+    json_renderer(@messages)
   end
 
   # POST /api/v1/messages
   def create
     set_message_receiver if message_params[:receiver_email].present?
     @message = Message.create!(@final_message_params)
-    json_response(@message, nil, :created)
+    json_renderer(@message, :created)
   end
 
   # GET /api/v1/messages/:id
   def show
-    json_response(@message)
+    json_renderer(@message)
   end
 
   # GET /api/v1/messages/sent
   def sent
-    @sent_messages = Message.sent_from(current_user)
-    json_response(@sent_messages)
+    @sent_messages = Message.sent_from(current_user).ordered
+    json_renderer(@sent_messages)
   end
 
   private
