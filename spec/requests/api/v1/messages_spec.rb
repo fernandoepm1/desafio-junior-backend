@@ -1,22 +1,12 @@
 require 'rails_helper'
 
 describe 'Messages', type: :request do
-  let(:current_user) { create(:user) }
+  let!(:current_user) { create(:user) }
   let(:sent_messages) { create_list(:message, 69, from: current_user) }
   let(:received_messages) { create_list(:message, 69, to: current_user) }
   let(:first_message) { current_user.messages.first }
-  let(:invalid_headers) {
-    {
-      "Content-Type": "application/json",
-      "Authorization": "Batata"
-    }
-  }
-  let(:valid_headers) {
-    {
-      "Content-Type": "application/json",
-      "Authorization": "#{current_user.token}"
-    }
-  }
+  let(:valid_message_params) { attributes_for(:message) }
+  let(:invalid_message_params) { attributes_for(:invalid_message) }
 
   describe 'GET messages#index' do
     context 'without authorization header' do
@@ -28,7 +18,7 @@ describe 'Messages', type: :request do
     end
 
     context 'with an invalid authorization header' do
-      before { get '/api/v1/messages', headers: invalid_headers }
+      before { get '/api/v1/messages', headers: { "Authorization": "Potato" } }
 
       it 'returns http status 401' do
         expect(response).to have_http_status(:unauthorized)
@@ -36,7 +26,10 @@ describe 'Messages', type: :request do
     end
 
     context 'with a valid authorization header' do
-      before { get '/api/v1/messages', headers: valid_headers }
+      before do
+        get '/api/v1/messages',
+          headers: { "Authorization": "#{current_user.token}" }
+      end
 
       it 'returns http status 200' do
         expect(response).to have_http_status(:success)
@@ -61,7 +54,7 @@ describe 'Messages', type: :request do
       before do
         post '/api/v1/messages',
           params: { message: '' },
-          headers: invalid_headers
+          headers: { "Authorization": "42" }
       end
 
       it 'returns http status 401' do
@@ -71,22 +64,37 @@ describe 'Messages', type: :request do
 
     context 'with a valid authorization header' do
       context 'but with invalid params' do
-        before do
+        before do |request|
           post '/api/v1/messages',
-            params: { message: attributes_for(:invalid_message) },
-            headers: valid_headers
+            params: { message: invalid_message_params },
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "#{current_user.token}"
+            }
         end
 
-        it 'returns http status 301' do
+        it 'returns http status 422' do
           expect(response).to have_http_status(:unproccessable_entity)
+        end
+
+        it 'does not create a new message in the database' do
+          expect { request }.to_not change(Message, :count).by(+1)
+        end
+
+        it 'returns a validation error' do
+          expect(json['errors']).to_not be_empty
+          expect(json['errors']).to match(//) #=> Ver erro
         end
       end
 
       context 'and with valid params' do
         before do |request|
           post '/api/v1/messages',
-            params: { message: attributes_for(:message) },
-            headers: valid_headers
+            params: { message: valid_message_params },
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "#{current_user.token}"
+            }
         end
 
         it 'returns http status 201' do
@@ -94,14 +102,11 @@ describe 'Messages', type: :request do
         end
 
         it 'creates a new message in the database' do
-          expect(request).to change { Message.count }.by(1)
+          expect { request }.to change(Message, :count).by(+1)
         end
 
-        it 'create a new message with the given params' do
-          created_message = Message.last
-
-          expect(created_message.title).to_be eq(valid_params.title)
-          expect(created_message.content).to_be eq(valid_params.content)
+        it 'creates a new message with the given params' do
+          expect(Message.last).to have_attributes valid_message_params[:message]
         end
       end
     end
@@ -109,7 +114,7 @@ describe 'Messages', type: :request do
 
   describe 'GET messages#show' do
     context 'without authorization header' do
-      before { get '/api/v1/messages/1' }
+      before { get "/api/v1/messages/#{first_message.id}" }
 
       it 'returns http status 401' do
         expect(response).to have_http_status(:unauthorized)
@@ -117,7 +122,10 @@ describe 'Messages', type: :request do
     end
 
     context 'with an invalid authorization header' do
-      before { get '/api/v1/messages/1' }
+      before do
+        get "/api/v1/messages/#{first_message.id}",
+          headers: { "Authorization": "Strogonoff" }
+      end
 
       it 'returns http status 401' do
         expect(response).to have_http_status(:unauthorized)
@@ -125,20 +133,40 @@ describe 'Messages', type: :request do
     end
 
     context 'with a valid authorization header' do
-      before { get '/api/v1/messages/1' }
-      let(:first_message) { current_user.messages.first }
+      context 'but the record does not exist' do
+        before do
+          get "/api/v1/messages/#{id = 0}",
+            headers: { "Authorization": "#{current_user.token}" }
+        end
 
-      it 'returns http status 200' do
-        expect(response).to have_http_status(:success)
+        it 'returns http status 404' do
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it 'returns an error' do
+          expect(json['errors']).to_not be_empty
+        end
       end
 
-      it 'returns a single message' do
-        expect(response.body.size).to_be eq(1)
-      end
+      context 'and the record exists' do
+        before do
+          get "/api/v1/messages/#{first_message.id}",
+            headers: { "Authorization": "#{current_user.token}" }
+        end
 
-      it 'returns the first message sent to current user' do
-        expect(response.body.title).to_be eq(first_message.title)
-        expect(response.body.content).to_be eq(first_message.content)
+        it 'returns http status 200' do
+          expect(response).to have_http_status(:success)
+        end
+
+        it 'returns a single message' do
+          expect(json.size).to_be eq(1)
+        end
+
+        it 'returns the first message sent to current user' do
+          expect(json['id']).to_be eq(first_message.id)
+          expect(json['title']).to_be eq(first_message.title)
+          expect(json['content']).to_be eq(first_message.content)
+        end
       end
     end
   end
@@ -153,7 +181,9 @@ describe 'Messages', type: :request do
     end
 
     context 'with an invalid authorization header' do
-      before { get '/api/v1/messages/sent', headers: invalid_headers }
+      before do
+        get '/api/v1/messages/sent', headers: { "Authorization": "Pamonha" }
+      end
 
       it 'returns http status 401' do
         expect(response).to have_http_status(:unauthorized)
@@ -161,14 +191,18 @@ describe 'Messages', type: :request do
     end
 
     context 'with a valid authorization header' do
-      before { get '/api/v1/messages/sent', headers: valid_headers }
+      before do
+        get '/api/v1/messages/sent',
+          headers: { "Authorization": "#{current_user.token}" }
+      end
 
       it 'returns http status 200' do
         expect(response).to have_http_status(:success)
       end
 
       it 'returns all messages sent by current user' do
-        expect(response.body.size).to eq(current_user.sent_messages.size)
+        expect(json).to_not be_empty
+        expect(json.size).to eq(current_user.sent_messages.size)
       end
     end
   end

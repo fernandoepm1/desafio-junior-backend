@@ -11,11 +11,11 @@ class Message < ApplicationRecord
 
   enum status: { unread: 0, read: 1, archived: 2 }
 
-  scope :sent_to, -> (user) { includes(:sender).where(to: user.id).where.not(status: 2) }
-  scope :sent_from, -> (user) { includes(:receiver).where(from: user.id).where.not(status: 2) }
+  scope :sent_to, -> (user) { includes(:sender).where(to: user.id).where.not(status: :archived) }
+  scope :sent_from, -> (user) { includes(:receiver).where(from: user.id).where.not(status: :archived) }
   scope :all_sent_to, -> (user) { where(to: user.id) }
-  scope :ordered, -> { order('created_at DESC') }
-  scope :master_messages, -> { includes(:sender).where.not(status: 2) }
+  scope :ordered, -> { order(created_at: :desc) }
+  scope :master_messages, -> { includes(:sender).where.not(status: :archived) }
 
   before_update :update_tracker
 

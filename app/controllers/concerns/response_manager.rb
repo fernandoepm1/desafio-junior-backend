@@ -1,7 +1,5 @@
 module ResponseManager
-  def json_response(object, serializer = nil, status = :ok)
-    serialized_object = serializer.nil? ? object : serializer.new(object).as_json
-
-    render json: serialized_object, status: status
+  def json_renderer(object, status = :ok, serializer = nil)
+    render json: object, status: status, serializer: serializer
   end
 end
