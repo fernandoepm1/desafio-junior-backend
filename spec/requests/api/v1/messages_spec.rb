@@ -4,6 +4,7 @@ describe 'Messages', type: :request do
   let(:current_user) { create(:user) }
   let(:sent_messages) { create_list(:message, 69, from: current_user) }
   let(:received_messages) { create_list(:message, 69, to: current_user) }
+  let(:first_message) { current_user.messages.first }
   let(:invalid_headers) {
     {
       "Content-Type": "application/json",
