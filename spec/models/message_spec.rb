@@ -1,13 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe Message, type: :model do
-
-  let(:user) { FactoryBot.create(:user)}
-  let(:user1) { FactoryBot.create(:user)}
-  let(:message) { FactoryBot.create(:message,from: user.id,to: user1.id)}
-  let(:message1) { FactoryBot.create(:message,from: user1.id,to: user.id)}
-  let(:read_message) { FactoryBot.create(:message,:read,from: user.id,to: user1.id)}
-  let(:archived_message) { FactoryBot.create(:message,:archived,from: user.id,to: user1.id)}
+  let(:user) { create(:user)}
+  let(:user1) { create(:user)}
+  let(:message) { create(:message, from: user.id, to: user1.id)}
+  let(:message1) { create(:message, from: user1.id, to: user.id)}
+  let(:read_message) { create(:message, :read, from: user.id, to: user1.id)}
+  let(:archived_message) { create(:message, :archived, from: user.id, to: user1.id)}
 
   describe 'creation' do
     it 'is valid with valid atributes' do
@@ -20,17 +19,16 @@ RSpec.describe Message, type: :model do
     end
 
     it 'is invalid without from' do
-      message = FactoryBot.build(:message,:no_from)
+      message = build(:message,:no_from)
       expect(message).to_not be_valid
     end
 
     it 'is invalid without to' do
-      message = FactoryBot.build(:message,:no_to)
+      message = build(:message,:no_to)
       expect(message).to_not be_valid
     end
 
   end
-
 
   describe 'update' do
     it 'record time when change read message' do
@@ -94,8 +92,6 @@ RSpec.describe Message, type: :model do
   end
 
   describe 'shoulda matchers' do
-    subject(:message) { FactoryBot.create(:message)}
-
     it { is_expected.to validate_presence_of(:title)}
     it { is_expected.to validate_presence_of(:content)}
     it { is_expected.to validate_presence_of(:from)}
