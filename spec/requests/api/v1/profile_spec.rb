@@ -3,10 +3,8 @@ require 'rails_helper'
 describe 'Profile', type: :request do
   let!(:current_user) { create(:user) }
   let(:user_token) { current_user.token }
-  let(:valid_user_params) {
-    { user: { name: 'Alexander', email: 'thegreat@email.com' }.merge!(id: current_user.id) }
-  }
-  let(:invalid_user_params) { { user: { password: '0' } } }
+  let(:valid_user_params) { { id: current_user.id, user: attributes_for(:user) } }
+  let(:invalid_user_params) { { user: attributes_for(:invalid_user) } }
 
   describe 'GET profile#show' do
     context 'without authorization header' do
@@ -108,6 +106,8 @@ describe 'Profile', type: :request do
           put '/api/v1/profile',
             params: valid_user_params,
             headers: { 'Authorization': "#{user_token}" }
+
+          current_user.reload
         end
 
         it 'returns http status 204' do
@@ -117,7 +117,6 @@ describe 'Profile', type: :request do
         it 'updates profile with given params' do
           expect(current_user.name).to eq(valid_user_params[:user][:name])
           expect(current_user.email).to eq(valid_user_params[:user][:email])
-          expect(current_user.password).to eq(valid_user_params[:user][:password])
         end
       end
     end
@@ -176,6 +175,8 @@ describe 'Profile', type: :request do
           patch '/api/v1/profile',
             params: valid_user_params,
             headers: { 'Authorization': "#{user_token}" }
+
+          current_user.reload
         end
 
         it 'returns http status 204' do
@@ -185,7 +186,6 @@ describe 'Profile', type: :request do
         it 'updates profile with given params' do
           expect(current_user.name).to eq(valid_user_params[:user][:name])
           expect(current_user.email).to eq(valid_user_params[:user][:email])
-          expect(current_user.password).to eq(valid_user_params[:user][:password])
         end
       end
     end
