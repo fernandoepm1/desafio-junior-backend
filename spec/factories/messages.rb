@@ -2,8 +2,8 @@ FactoryBot.define do
   factory :message do
     title { Faker::Name.name }
     content { 'Lorem ipsum' }
-    from factory: :user
-    to factory: :user
+    from { create(:user).id }
+    to { create(:user).id }
 
     trait :no_from do
       from nil
@@ -28,5 +28,6 @@ FactoryBot.define do
     factory :invalid_message,  traits: %i[no_content]
     factory :read_message,     traits: %i[read]
     factory :archived_message, traits: %i[archived]
+    factory :api_message,      traits: %i[no_from no_to]
   end
 end
