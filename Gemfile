@@ -35,6 +35,7 @@ group :development, :test do
   gem 'pry'
   gem 'better_errors'
   gem 'rails-controller-testing'
+  gem 'phantomjs', :require => 'phantomjs/poltergeist'
 end
 
 group :development do
